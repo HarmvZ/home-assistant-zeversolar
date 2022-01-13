@@ -1,0 +1,38 @@
+zeversolar:
+  sensor:
+    - platform: rest
+      name: Zeversolar full output
+      resource: http://<zeversolar inverter ip/hostname>/home.cgi
+
+  template:
+    - binary_sensor:
+      - name: "Zeversolar status"
+        state: "{{ states('sensor.zeversolar_full_output') not in ['unavailable', 'unknown'] }}"
+    - sensor:
+      - name: "Zeversolar Pac"
+        unit_of_measurement: W
+        state: >
+          {% if (is_state('binary_sensor.zeversolar_status', 'on')) %}
+            {{ states('sensor.zeversolar_full_output').split()[11] | float }}
+          {% else %}
+            0
+          {% endif %}
+    - sensor:
+      - name: "Zeversolar E Today"
+        unit_of_measurement: kWh
+        state_class: "total_increasing"
+        state: >
+          {% if (is_state('binary_sensor.zeversolar_status', 'on')) %}
+            {% set e_today = states('sensor.zeversolar_full_output').split()[12].split('.') %}
+            {% if (len(e_today[1]) < 2) {
+              {{ (e_today[0] + '.0' + e_today[1]) | float }}
+            {% else %}
+              {{ e_today.join('.') | float }}
+            {% endif %}
+          {% else %}
+            {% if (now() > today_at("12:00")) %}
+              {{ states('sensor.zeversolar_e_today') }}
+            {% else %}
+              0
+            {% endif %}
+          {% endif %}
