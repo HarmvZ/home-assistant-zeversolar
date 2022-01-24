@@ -7,7 +7,7 @@ zeversolar:
   template:
     - binary_sensor:
       - name: "Zeversolar status"
-        state: "{{ states('sensor.zeversolar_full_output') not in ['unavailable', 'unknown'] }}"
+        state: "{{ states('sensor.zeversolar_full_output') not in ['unavailable', 'unknown'] and (states('sensor.zeversolar_full_output').split() | length) == 15 }}"
     - sensor:
       - name: "Zeversolar Pac"
         unit_of_measurement: W
@@ -24,13 +24,13 @@ zeversolar:
         state: >
           {% if (is_state('binary_sensor.zeversolar_status', 'on')) %}
             {% set e_today = states('sensor.zeversolar_full_output').split()[12].split('.') %}
-            {% if (len(e_today[1]) < 2) {
+            {% if ((e_today[1] | length) < 2) %}
               {{ (e_today[0] + '.0' + e_today[1]) | float }}
             {% else %}
-              {{ e_today.join('.') | float }}
+              {{ '.'.join(e_today) | float }}
             {% endif %}
           {% else %}
-            {% if (now() > today_at("12:00")) %}
+            {% if (is_state('sun.sun', 'above_horizon') or now() > today_at("12:00")) %}
               {{ states('sensor.zeversolar_e_today') }}
             {% else %}
               0
