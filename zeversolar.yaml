@@ -25,9 +25,14 @@ zeversolar:
           {% if (is_state('binary_sensor.zeversolar_status', 'on')) %}
             {% set e_today = states('sensor.zeversolar_full_output').split()[12].split('.') %}
             {% if ((e_today[1] | length) < 2) %}
-              {{ (e_today[0] + '.0' + e_today[1]) | float }}
+              {% set e_val = (e_today[0] + '.0' + e_today[1]) | float %}
             {% else %}
-              {{ '.'.join(e_today) | float }}
+              {% set e_val =  '.'.join(e_today) | float %}
+            {% endif %}
+            {% if ((states('sensor.zeversolar_e_today') | float) > e_val) %}
+              {{ states('sensor.zeversolar_e_today') }}
+            {% else %}
+              {{ e_val }}
             {% endif %}
           {% else %}
             {% if (is_state('sun.sun', 'above_horizon') or now() > today_at("12:00")) %}
