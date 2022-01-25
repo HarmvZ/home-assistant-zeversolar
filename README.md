@@ -33,4 +33,5 @@ This configuration adds a few sensors to Home Assistant containing statistics fr
 There are some issues with other implementations that I tried to fix here.
 - The zeversolar output contains a bug that whenever the output for total energy today has a single decimal place, the actual value it represents requires a leading zero in the decimals. For example `0.4` should be `0.04`.
 - Sometimes the inverter randomly produces an invalid output containing something like `1 0 000000000000 +XXXXX-XXXX 00:00 00/00/2000 0 0 Error`, this should be ignored.
+- Sometimes, mostly somewhere at the end of the day the inverter produces values for the total energy produced that are lower than previous values. These values will also be ignored.
 - When the inverter is offline the sensors for total daily energy and current output would become `unknown` or `unavailable`. Now current output will be 0 and total daily energy will be the last valid value until 00:00 when it will reset to 0.
